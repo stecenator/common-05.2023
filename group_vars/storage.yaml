@@ -1,0 +1,14 @@
+---
+# Zmienne storage
+# marcin_stec@pl.ibm.com
+
+# Dyski do odwracania:
+
+fs_cluster: "v5ke.iic"
+fs_username: "marcinek"
+
+os_src_vol: "volume-ms6018-sp-com-4a61ed9d-00000013-boot--5f9e3efb-b856"
+os_bkp_vol:	"volume-ms6018-sp-com-4a61ed9d-00000013-boot--5f9e3efb-b856_01"
+
+os_bkp_fcmap: "fcmap0"
+os_res_fcmap: "fcmap0rev"

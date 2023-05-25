@@ -1,0 +1,13 @@
+---
+# Zmienne AIX
+# marcin_stec@pl.ibm.com
+
+# Właściciel instancji
+
+sp_user: spinst1
+# sp_pass:  schowany w secrets/secrets.enc
+
+# Użyteczny użyszkodnik
+
+user1: marcinek
+# user1_pass: schowany w secrets/secrets.enc

@@ -53,3 +53,17 @@ System musi spełniać wymagania opisane w [dokumentacji kolekcji](https://ibm.g
 	- Python 3. Im nowszy tym lepszy.
 
 ## Macierz 
+
+# Playbook `aix-restore.yaml`
+
+To jest playbook pomocniczy, do resetowania środowiska. Jego funkcjie to:
+
+- Uruchomić relację flash copy podaną w zmiennej `{{ os_res_fcmap }}`
+
+*Plan, żeby było ładnie:*
+
+- Gasi na miekko AIXy z grupy `[all-aix]`.
+- Upewnia się na HMC, że LPARY leżą
+- Odwraca replikację startując `{{ os_res_fcmap }}`
+- Zdejmuje mapowania LUNów z listy `{{ sp_luns }}`
+- Kasuje LUNy z listy  `{{ sp_luns }}`

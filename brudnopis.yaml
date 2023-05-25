@@ -1,0 +1,26 @@
+---
+# Brudnopis
+# marcin_stec@pl.ibm.com
+- hosts: all-aix
+  gather_facts: True
+  remote_user: root
+  # become: True
+
+  tasks:
+    - name: Debug
+      debug:
+        var: sp_pass
+        
+    - name: Zakładanie użyszkodnika instancji
+      ibm.power_aix.user:
+        name: "{{ sp_user }}"
+        state: present
+        change_passwd_on_login: False
+        password: "{{ sp_pass }}"
+        # attributes: wrzucic ti dict z rekomendowanymi atrybutami dla włąsciciela instancji Protect
+    - name: Zakładanie dodatkowego użyszkodnika
+      ibm.power_aix.user:
+        name: "{{ user1 }}"
+        state: present
+        change_passwd_on_login: False
+        password: "{{ user1_pass }}"

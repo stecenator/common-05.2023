@@ -1,0 +1,8 @@
+---
+# Restore AIXa z FlashCopy IBM SVC 
+# marcin_stec@pl.ibm.com
+
+- hosts: localhost		# Bo oba moduły któ©e zamierzam zawołać są RESTowe
+
+  tasks:
+    - ibm.spectrum_virtualize.ibm_svc_info:

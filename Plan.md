@@ -8,8 +8,75 @@ Struktura playbooka:
 - role
 - struktura katalogów
 - zmienne
+- sekrety
 
-## Moduły AIX
+## Sekrety
+
+Dobrze jest nie trzymać haseł, nawet w formie hashy bezpośrednio w playbooku. Podejśc jest kilka, ja wybrałem `ansible-vault`, który plik z krytycznymi zmienymi potrafi po prostu zaszyfrować. Szczególowy opis znajduje się [tutaj](https://www.redhat.com/sysadmin/ansible-playbooks-secrets). Całość sprowadza się do następującycj kroków:
+
+1. Utwórz tekstowy plik `secrets/secrets.enc`  (katalog i nazwa dowolne). Wrzuć tam swoje zmienne:
+
+	```
+	sp_pass: "C0mm0n2023"
+	```
+2. Zaszyfruj go 
+
+	```
+	❯ ansible-vault encrypt secrets.enc
+	New Vault password: 
+	Confirm New Vault password: 
+	Encryption successful
+	❯ cat secrets.enc
+	$ANSIBLE_VAULT;1.1;AES256
+	61653236363337633534656533353332626234346233336630633264323862663663356263396463
+	[...]
+	```
+3. Wołaj playbooka z opcjami jak poniżej:
+
+	```
+	❯ ansible-playbook brudnopis.yaml -e @secrets/secrets.enc --ask-vault-pass
+	Vault password: 
+	```
+4. Chcesz coś zmienić w zaszyfrowanym pliku? Nic prostszego:
+
+	```
+	❯ ansible-vault edit secrets/secrets.enc
+	Vault password: 
+	```
+
+	Po podaniu hasła wywoła się `$EDITOR` z Twoim plikiem. Po zamknięciu, plik zotanie automatycznie zaszyfrowany z powrotem.
+
+## Zainstalowane kolekcje
+
+Żeby sprawdzić zainstalowane w systemie oraz na Twoim koncie kolekcje Ansible wykonaj polecenie:
+
+```
+❯ ansible-galaxy collection list
+
+# /home/marcinek/.ansible/collections/ansible_collections
+Collection              Version
+----------------------- -------
+ansible.netcommon       1.4.1  
+ansible.posix           1.1.1  
+community.general       1.3.0  
+community.kubernetes    1.1.1  
+community.vmware        1.11.0 
+google.cloud            1.0.1  
+ibm.power_aix           1.6.1  
+ibm.power_hmc           1.6.0  
+ibm.power_ibmi          1.1.2  
+ibm.spectrum_virtualize 1.12.0 
+
+# /usr/lib/python3.11/site-packages/ansible_collections
+Collection                    Version
+----------------------------- -------
+amazon.aws                    5.4.0  
+ansible.netcommon             4.1.0  
+ansible.posix                 1.5.2  
+[...]
+```
+
+## Kolekcja AIX
 
 ### Komenda `ansible-doc` w akcji:
 
@@ -51,7 +118,10 @@ Struktura playbooka:
     ```
 
 
-## Moduły SVC
+## Kolekcja SVC
+
+Analogicznie do modułów AIX, wyświetl 
+1. 
 
 ## Pamięc masowa
 
