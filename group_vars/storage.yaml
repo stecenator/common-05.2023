@@ -16,6 +16,7 @@ os_bkp_fcmap: "fcmap0"
 os_res_fcmap: "fcmap0rev"
 
 sp_mdiskgrp: "Pool0"    # Pula do zakładania LUNów. W większej instalacji będą conajmniej 2: SSD i NLS
+sp_iogrp: "io_grp0"     # IO grupa
 sp_luns:    # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
   COMMON_spinst1: 20
   COMMON_actlog: 132

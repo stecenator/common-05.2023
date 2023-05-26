@@ -1,0 +1,30 @@
+---
+# Przygotowanie LUNów pod instalację Spectrum Protect. 
+# marcin_stec@pl.ibm.com
+
+- hosts: localhost		# Bo oba moduły które zamierzam zawołać są RESTowe
+  # remote_user: root # zapchajdziura do zbierania faktów z localhost
+  gather_facts: False
+
+  tasks:
+    - name: "Uwierzytelnienie na jako {{ fs_username }} na {{ fs_cluster }}"
+      register: auth_info   # auth_info.token pozwala potem nie użwać user i hasła
+      ibm.spectrum_virtualize.ibm_svc_auth:
+        clustername: "{{ fs_cluster }}"
+        log_path: "{{ fs_log }}"
+        username: "{{ fs_username }}"
+        password: "{{ fs_pass }}"
+
+    - name: Zakładanie LUNów
+      ibm.spectrum_virtualize.ibm_svc_manage_volume:
+        clustername: "{{ fs_cluster }}"
+        log_path: "{{ fs_log }}"
+        token: "{{ auth_info.token }}"
+        name: "{{ item.key }}"
+        state: "present"
+        pool: "{{ sp_mdiskgrp }}"
+        size: "{{ item.value }}"
+        unit: "gb"
+        iogrp: "{{ sp_iogrp }}"
+        novolumegroup: True
+      with_dict: "{{ sp_luns }}"
