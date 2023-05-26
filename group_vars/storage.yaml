@@ -7,8 +7,21 @@
 fs_cluster: "v5ke.iic"
 fs_username: "marcinek"
 
+fs_log: "/tmp/FS-playbook.log"  # Log zrzucany przez moduły z kolekcji ibm.spectrum_virtualize
+
 os_src_vol: "volume-ms6018-sp-com-4a61ed9d-00000013-boot--5f9e3efb-b856"
 os_bkp_vol:	"volume-ms6018-sp-com-4a61ed9d-00000013-boot--5f9e3efb-b856_01"
 
 os_bkp_fcmap: "fcmap0"
 os_res_fcmap: "fcmap0rev"
+
+sp_mdiskgrp: "Pool0"    # Pula do zakładania LUNów. W większej instalacji będą conajmniej 2: SSD i NLS
+sp_luns:    # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
+  COMMON_spinst1: 20
+  COMMON_actlog: 132
+  COMMON_archlog: 256
+  COMMON_db01: 64
+  COMMON_db02: 64
+  COMMON_dbb: 256
+  COMMON_dc01: 64
+  COMMON_dc02: 64

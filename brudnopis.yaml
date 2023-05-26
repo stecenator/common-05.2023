@@ -1,7 +1,7 @@
 ---
 # Brudnopis
 # marcin_stec@pl.ibm.com
-- hosts: all-aix
+- hosts: all_aix
   gather_facts: True
   remote_user: root
   # become: True

@@ -1,8 +1,8 @@
 ajax.iic
-v5ke.iic
+localhost
 
-[all-aix]
+[all_aix]
 ajax.iic
 
 [storage]
-v5k.iic
+localhost
