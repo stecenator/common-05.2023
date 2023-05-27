@@ -54,6 +54,11 @@ System musi spełniać wymagania opisane w [dokumentacji kolekcji](https://ibm.g
 
 ## Macierz 
 
+Kolekcja `ibm.spectrum_virtulize` bazuje na REST API. To znaczy, że moduły są wołane z hosta kontrolnego, a nie zdalnie. Szczegółowe wymagania oraz instalacja opisane są [tutaj](https://github.com/ansible-collections/ibm.spectrum_virtualize), ale sprowadzają się do:
+
+- dostępu do REST API macierzy: https://adres.macierzy:7443/rest 
+- Firmware macierzy > 8.3.1.5.
+
 # Playbook `aix-restore.yaml`
 
 To jest playbook pomocniczy, do resetowania środowiska. Jego funkcjie to:
