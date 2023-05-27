@@ -59,16 +59,44 @@ Kolekcja `ibm.spectrum_virtulize` bazuje na REST API. To znaczy, że moduły są
 - dostępu do REST API macierzy: https://adres.macierzy:7443/rest 
 - Firmware macierzy > 8.3.1.5.
 
-# Playbook `aix-restore.yaml`
+# Zmienne
+
+Wszystkie playbooki zostały napisane tak, żeby ułatwić ich użycie w warunkach "bojowych", to znaczy łatwo je dostosować poprzez zmianę wartości poszczególnych zmiennych
+
+Zmienne z grupy `[storage]`:
+
+- **`fs_cluster`** - Adres macierzy na której będą zakładane LUNy
+- **`fs_user`** - Konto administratora macierzy.
+- **`fs_log`** - Plik diagnostyczny modułów kolekcji `ibm.spectrum_virtualize`
+- **`sp_luns`** - Hash w postaci par `nazwa_lunu:rozmiar_w_GiB` - lista LUNów do manipulowania przez playbooki związane z obsługą pamięci masowej.
+
+
+# Playbook `AIX-restore.yaml`
 
 To jest playbook pomocniczy, do resetowania środowiska. Jego funkcjie to:
 
-- Uruchomić relację flash copy podaną w zmiennej `{{ os_res_fcmap }}`
-
-*Plan, żeby było ładnie:*
-
-- Gasi na miekko AIXy z grupy `[all-aix]`.
-- Upewnia się na HMC, że LPARY leżą
+- Gasi na miekko AIXa z wskazanego na pugle `{{ sys_name }}` w LPARze `{{ lpar_name }}`.
+- Upewnia się na HMC, że LPAR leży. **Update:** ten krok okazał się zbędny, bo moduł gaszący LPAR czeka aż ten zgaśnie. Ale zostawiam ten kod jako przykład klauzuli `until` w tasku.
 - Odwraca replikację startując `{{ os_res_fcmap }}`
 - Zdejmuje mapowania LUNów z listy `{{ sp_luns }}`
 - Kasuje LUNy z listy  `{{ sp_luns }}`
+- Startuje czystego AIXa z powrotem. 
+
+# Playbook `prep_storage.yaml`
+
+Przygotowuje LUNy i je mapuje na hosta AIXowego.
+
+
+
+# Playbook `AIX-spinstall.yaml`
+
+Przygotowuje OS do instalacji i konfiguracji IBM Spectrum Protect:
+
+- Zakłada usera instancji, wraz zrekomendowynymi ustawieniami.
+- Skanuje storage w poszukiwaniu dysków do założenia filesystemów.
+- Zakłada filesystemy pod instancję Spectrum Protect.
+- Instaluje w trybie *silent* IBM Spectrum Protectc
+- Konfiguruje instancję IBM Spectrum Protect
+
+## Zmienne
+
