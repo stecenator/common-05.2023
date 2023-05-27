@@ -1,14 +1,118 @@
 # Plan prezentacji
 
-## Powtórka z Ansibla
+Planowany przebieg prelekcji. 
+
+# Powtórka z Ansibla
 
 Struktura playbooka:
 
+- Potrzebne kolekcje
 - play
 - role
 - struktura katalogów
 - zmienne
 - sekrety
+
+
+## Kolekcje
+
+Do poprawnego działania potrzebne są następujące kolekcje z repozytoriów IBM:
+
+- `ibm.spectrum_virtualize`
+- `ibm.power_aix`
+- `ibm.power_hmc`
+
+### Instalacja potrzebych kolekcji
+
+1. Zainstaluj powyższe moduły:
+
+	```
+	❯ ansible-galaxy collection install -f ibm.power_aix
+	Starting galaxy collection install process
+	Process install dependency map
+	Starting collection install process
+	Downloading https://galaxy.ansible.com/download/ibm-power_aix-1.6.1.tar.gz to /home/marcinek/.ansible/tmp/ansible-local-513942m0tz9n9/tmpj3peeea4/ibm-power_aix-1.6.1-m3clxxf_
+	Installing 'ibm.power_aix:1.6.1' to '/home/marcinek/.ansible/collections/ansible_collections/ibm/power_aix'
+	ibm.power_aix:1.6.1 was installed successfully
+	
+	❯ ansible-galaxy collection install -f ibm.spectrum_virtualize
+	Starting galaxy collection install process
+	Process install dependency map
+	Starting collection install process
+	Downloading https://galaxy.ansible.com/download/ibm-spectrum_virtualize-1.12.0.tar.gz to /home/marcinek/.ansible/tmp/ansible-local-516915yry1_2s/tmpiyg_z4qb/ibm-spectrum_virtualize-1.12.0-tmpyehcg
+	Installing 'ibm.spectrum_virtualize:1.12.0' to '/home/marcinek/.ansible/collections/ansible_collections/ibm/spectrum_virtualize'
+	ibm.spectrum_virtualize:1.12.0 was installed successfully
+
+	❯ ansible-galaxy collection install -f ibm.power_hmc
+	Starting galaxy collection install process
+	Process install dependency map
+	[...]
+	```
+
+1. Wyświetl zainstalowane kolekcje:
+
+	```
+	❯ ansible-galaxy collection list
+
+	# /home/marcinek/.ansible/collections/ansible_collections
+	Collection              Version
+	----------------------- -------
+	ansible.netcommon       1.4.1  
+	ansible.posix           1.1.1  
+	community.general       1.3.0  
+	community.kubernetes    1.1.1  
+	community.vmware        1.11.0 
+	google.cloud            1.0.1  
+	ibm.power_aix           1.6.1  
+	ibm.power_hmc           1.6.0  
+	ibm.power_ibmi          1.1.2  
+	ibm.spectrum_virtualize 1.12.0 
+
+	# /usr/lib/python3.11/site-packages/ansible_collections
+	Collection                    Version
+	----------------------------- -------
+	amazon.aws                    5.4.0  
+	ansible.netcommon             4.1.0  
+	ansible.posix                 1.5.2  
+	[...]
+	```
+
+1. Wyświetl listę modułów w kolekcji
+
+	```
+	❯ ansible-doc -l ibm.power_aix
+	ibm.power_aix.aixpert                         System security settings management                                                       
+	ibm.power_aix.alt_disk                        Alternate rootvg disk management                                                          
+	ibm.power_aix.backup                          Data or system volume group backup management                                             
+	ibm.power_aix.bootlist                        Alters the list of boot devices available to the system                                   
+	ibm.power_aix.bosboot                         Creates boot image                                                                        
+	ibm.power_aix.chsec                           Modify AIX stanza files                                                                   
+	ibm.power_aix.devices                         Devices management                                                                        
+	ibm.power_aix.emgr                            System interim fixes management                                                           
+	ibm.power_aix.filesystem                      Local and NFS filesystems management                                                      
+	ibm.power_aix.flrtvc                          Generate FLRTVC report, download and install security and HIPER fixes 
+	```
+
+1. Szczegóły modułu:
+
+	```
+	❯ ansible-doc ibm.power_aix.lvg
+	> IBM.POWER_AIX.LVG    (/home/marcinek/.ansible/collections/ansible_collections/ibm/power_aix/plugins/modules/lvg.py)
+
+	        This module creates, removes, modifies attributes, resizes, activates and deactivates volume groups.
+
+	ADDED IN: version 0.4.0 of ibm.power_aix
+
+	OPTIONS (= is mandatory):
+
+	- auto_on
+	        Specifies that the volume group is automatically available during a system restart.
+	        By default `auto_on=yes' when creating a volume group.
+	        Can be used when creating or changing a volume group, hence when `state=present'.
+	        default: null
+	        type: bool
+	[...]
+    ```
 
 ## Sekrety
 
@@ -50,78 +154,8 @@ Dobrze jest nie trzymać haseł, nawet w formie hashy bezpośrednio w playbooku.
 
 Żeby sprawdzić zainstalowane w systemie oraz na Twoim koncie kolekcje Ansible wykonaj polecenie:
 
-```
-❯ ansible-galaxy collection list
-
-# /home/marcinek/.ansible/collections/ansible_collections
-Collection              Version
------------------------ -------
-ansible.netcommon       1.4.1  
-ansible.posix           1.1.1  
-community.general       1.3.0  
-community.kubernetes    1.1.1  
-community.vmware        1.11.0 
-google.cloud            1.0.1  
-ibm.power_aix           1.6.1  
-ibm.power_hmc           1.6.0  
-ibm.power_ibmi          1.1.2  
-ibm.spectrum_virtualize 1.12.0 
-
-# /usr/lib/python3.11/site-packages/ansible_collections
-Collection                    Version
------------------------------ -------
-amazon.aws                    5.4.0  
-ansible.netcommon             4.1.0  
-ansible.posix                 1.5.2  
-[...]
-```
-
-## Kolekcja AIX
-
-### Komenda `ansible-doc` w akcji:
-
-1. Wyświetlenie listy modułów w kolekcji
-
-	```
-	❯ ansible-doc -l ibm.power_aix
-	ibm.power_aix.aixpert                         System security settings management                                                       
-	ibm.power_aix.alt_disk                        Alternate rootvg disk management                                                          
-	ibm.power_aix.backup                          Data or system volume group backup management                                             
-	ibm.power_aix.bootlist                        Alters the list of boot devices available to the system                                   
-	ibm.power_aix.bosboot                         Creates boot image                                                                        
-	ibm.power_aix.chsec                           Modify AIX stanza files                                                                   
-	ibm.power_aix.devices                         Devices management                                                                        
-	ibm.power_aix.emgr                            System interim fixes management                                                           
-	ibm.power_aix.filesystem                      Local and NFS filesystems management                                                      
-	ibm.power_aix.flrtvc                          Generate FLRTVC report, download and install security and HIPER fixes 
-	```
-
-1. Szczegóły modułu:
-
-	```
-	❯ ansible-doc ibm.power_aix.lvg
-	> IBM.POWER_AIX.LVG    (/home/marcinek/.ansible/collections/ansible_collections/ibm/power_aix/plugins/modules/lvg.py)
-
-	        This module creates, removes, modifies attributes, resizes, activates and deactivates volume groups.
-
-	ADDED IN: version 0.4.0 of ibm.power_aix
-
-	OPTIONS (= is mandatory):
-
-	- auto_on
-	        Specifies that the volume group is automatically available during a system restart.
-	        By default `auto_on=yes' when creating a volume group.
-	        Can be used when creating or changing a volume group, hence when `state=present'.
-	        default: null
-	        type: bool
-	[...]
-    ```
 
 
-## Kolekcja SVC
-
-Analogicznie do modułów AIX, wyświetl 
-1. 
 
 ## Pamięc masowa
 

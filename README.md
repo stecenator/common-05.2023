@@ -11,7 +11,8 @@ W ramach instalacji przeprowadzane playbook wykonuje następujące kroki:
 ## Materiały pomocnicze:
 
 - Dokumentacja modułu [ibm.power_aix](https://ibm.github.io/ansible-power-aix/index.html)
-- Dokumentacja modułu [ibm.spectum_virtualize]()
+- Dokumentacja modułu [ibm.power_hmc](https://ibm.github.io/ansible-power-hmc/index.html)
+- Dokumentacja modułu [ibm.spectum_virtualize](https://docs.ansible.com/ansible/latest/collections/ibm/spectrum_virtualize/index.html)
 
 # Przygotowanie środowiska
 
@@ -50,7 +51,7 @@ Host, który będzie uruchamiał playbook, musi spełniać nastęþujące wymaga
 System musi spełniać wymagania opisane w [dokumentacji kolekcji](https://ibm.github.io/ansible-power-aix/requirements.html). W skrócie:
 
 	- AIX 7.1 lub wyższy
-	- Python 3. Im nowszy tym lepszy.
+	- Python 3. Im nowszy tym lepszy. Ale wmurowany 2.7 też się nadaje!
 
 ## Macierz 
 
