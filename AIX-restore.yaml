@@ -3,10 +3,45 @@
 # marcin_stec@pl.ibm.com
 
 - hosts: localhost		# Bo oba moduły które zamierzam zawołać są RESTowe
-  remote_user: root # zapchajdziura do zbierania faktów z localhost
-  gather_facts: False
+  # remote_user: root   # zapchajdziura do zbierania faktów z localhost
+  gather_facts: False # Bo po co mi fakty z localhost jak tutaj jadę po REST API?
 
   tasks:
+    - name: "Gaszenie LPARu {{ lpar_name }} na HMC {{ hmc }}"
+      ibm.power_hmc.powervm_lpar_instance:
+        hmc_host: '{{ hmc }}'
+        hmc_auth:
+           username: '{{ hmc_user }}'
+           password: '{{ hmc_pass }}'
+        system_name: "{{ sys_name }}"
+        vm_name: "{{ lpar_name }}"
+        action: shutdown
+      tags:
+        - "LPAR_KILL"
+
+    - name: "Czekanie, aż AIX {{ sp_host }} w LPARZe {{ lpar_name }} się zatrzyma"
+      register: lpar_state
+      ibm.power_hmc.powervm_lpar_instance:
+        hmc_host: '{{ hmc }}'
+        hmc_auth:
+           username: '{{ hmc_user }}'
+           password: '{{ hmc_pass }}'
+        system_name: "{{ sys_name }}"
+        vm_name: "Novalink_IIC"
+        # vm_name: "{{ lpar_name }}"
+        state: facts    # Nie rób nic z partycją, tylko zbierz jej fakty
+      until: lpar_state.partition_info.PartitionState == "not activated"
+      retries: 5
+      delay: 30
+      tags:
+        - "LPAR_STAT"
+
+    - name: Wyświetlenie statusu LPARu
+      debug:
+        var: lpar_state
+      tags:
+        - "LPAR_STAT"
+
     - name: "Uwierzytelnienie na jako {{ fs_username }} na {{ fs_cluster }}"
       register: auth_info
       ibm.spectrum_virtualize.ibm_svc_auth:
@@ -14,15 +49,46 @@
         log_path: "{{ fs_log }}"
         username: "{{ fs_username }}"
         password: "{{ fs_pass }}"
+      tags:
+        - "FS_AUTH"
+        - "FS_FC_REV"
+        - "SP_LUNS_DEL"
 
-    - name: Zbieranie informacji o macierzy
-      register: svc_inf
-      ibm.spectrum_virtualize.ibm_svc_info:
+    - name: "Odkręcanie migawki relacją {{ os_res_fcmap }}"
+      # register: svc_inf
+      ibm.spectrum_virtualize.ibm_svc_start_stop_flashcopy:
         clustername: "{{ fs_cluster }}"
         log_path: "{{ fs_log }}"
         token: "{{ auth_info.token }}"
-        gather_subset: system     # Bo domyślne `all` to trochę za dużo
+        name: "{{ os_res_fcmap }}"
+        state: started
+      tags:
+        - "FS_FC_REV"
 
-    - name: Wyświetlanie informacji o macierzy
-      debug:
-        var: svc_inf
+    # - name: "Zdejmowanie volumeprotection na macirzy {{ fs_cluster }}"
+    # - name: "Zdejmowanie mapowań z LUNów sp_luns dla hosta {{ fs_host }} z macirzy {{ fs_cluster }}"
+
+    - name: "Usuwanie dysków z hasha {{ sp_luns }}"
+      ibm.spectrum_virtualize.ibm_svc_manage_volume:
+        clustername: "{{ fs_cluster }}"
+        log_path: "{{ fs_log }}"
+        token: "{{ auth_info.token }}"
+        name: "{{ item.key }}"
+        state: "absent"
+        pool: "{{ sp_mdiskgrp }}"
+      with_dict: "{{ sp_luns }}"
+      tags:
+        - "SP_LUNS_DEL"
+
+
+    - name: "Startowanie LPARu {{ lpar_name }} na HMC {{ hmc }}"
+      ibm.power_hmc.powervm_lpar_instance:
+        hmc_host: '{{ hmc }}'
+        hmc_auth:
+           username: '{{ hmc_user }}'
+           password: '{{ hmc_pass }}'
+        system_name: "{{ sys_name }}"
+        vm_name: "{{ lpar_name }}"
+        action: poweron
+      tags:
+        - "LPAR_START"
