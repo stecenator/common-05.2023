@@ -6,3 +6,7 @@ ajax.iic
 
 [storage]
 localhost
+
+[all]
+ajax.iic
+localhost

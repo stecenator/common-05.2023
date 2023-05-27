@@ -6,14 +6,15 @@
 
 fs_cluster: "v5ke.iic"
 fs_username: "marcinek"
-fs_log: "/tmp/FS-playbook.log"  # Log zrzucany przez moduły z kolekcji ibm.spectrum_virtualize
+fs_host: "ms6018-sp-com-4a61ed9d-00000013-30352511"     # Nazwa hosta AIXowego na macierzy
+fs_log: "/tmp/FS-playbook.log"                          # Log zrzucany przez moduły z kolekcji ibm.spectrum_virtualize
 os_src_vol: "volume-ms6018-sp-com-4a61ed9d-00000013-boot--5f9e3efb-b856"
 os_bkp_vol:	"volume-ms6018-sp-com-4a61ed9d-00000013-boot--5f9e3efb-b856_01"
 os_bkp_fcmap: "fcmap0"
 os_res_fcmap: "fcmap0rev"
 sp_mdiskgrp: "Pool0"    # Pula do zakładania LUNów. W większej instalacji będą conajmniej 2: SSD i NLS
 sp_iogrp: "io_grp0"     # IO grupa
-sp_luns:    # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
+sp_luns:                # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
   COMMON_spinst1: 20
   COMMON_actlog: 132
   COMMON_archlog: 256
@@ -22,3 +23,11 @@ sp_luns:    # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
   COMMON_dbb: 256
   COMMON_dc01: 64
   COMMON_dc02: 64
+
+# Manipulowanie LPARami
+hmc_user: marcinek
+hmc: hmc10.iic
+# hmc_pass: schowany w secrets/secrets.enc
+lpar_name: "ms6018-sp-com-4a61ed9d-00000013"  # Nazwa LPARu w HMC
+lpar_id: 10   # id LPARu
+sys_name: "5817-S922"   # Pudło na którym robię chrum-chrum
