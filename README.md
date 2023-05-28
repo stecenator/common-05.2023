@@ -21,30 +21,7 @@ W ramach instalacji przeprowadzane playbook wykonuje następujące kroki:
 Host, który będzie uruchamiał playbook, musi spełniać nastęþujące wymagania
 
 - Dostęp, najlepiej po kluczach do zarządzanych systemów.
-- Posiadać zainstalowane moduły :
-	- `ibm.power_aix`
 
-	```
-	❯ ansible-galaxy collection install -f ibm.power_aix
-	Starting galaxy collection install process
-	Process install dependency map
-	Starting collection install process
-	Downloading https://galaxy.ansible.com/download/ibm-power_aix-1.6.1.tar.gz to /home/marcinek/.ansible/tmp/ansible-local-513942m0tz9n9/tmpj3peeea4/ibm-power_aix-1.6.1-m3clxxf_
-	Installing 'ibm.power_aix:1.6.1' to '/home/marcinek/.ansible/collections/ansible_collections/ibm/power_aix'
-	ibm.power_aix:1.6.1 was installed successfully
-	```
-
-	- `ibm.spectrum_virtualize`
-
-	```
-	❯ ansible-galaxy collection install -f ibm.spectrum_virtualize
-	Starting galaxy collection install process
-	Process install dependency map
-	Starting collection install process
-	Downloading https://galaxy.ansible.com/download/ibm-spectrum_virtualize-1.12.0.tar.gz to /home/marcinek/.ansible/tmp/ansible-local-516915yry1_2s/tmpiyg_z4qb/ibm-spectrum_virtualize-1.12.0-tmpyehcg
-	Installing 'ibm.spectrum_virtualize:1.12.0' to '/home/marcinek/.ansible/collections/ansible_collections/ibm/spectrum_virtualize'
-	ibm.spectrum_virtualize:1.12.0 was installed successfully
-	```
 
 ## AIX
 
