@@ -2,3 +2,56 @@
 # Zmienne globalne
 # marcin_stec@pl.ibm.com
 sp_host: ms6018-sp-common
+
+# Lista LUNów jest współdzielona pomiędzy playbookami:
+sp_luns:                # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
+# Pomysł na zgrabniejsze rozwiązanie: hash list: COMMON_XXX -> [rozmiar, hdisk, nawza_lv, mountpoint]
+  COMMON_spinst1: 20
+  COMMON_actlog: 132
+  COMMON_archlog: 256
+  COMMON_db01: 64
+  COMMON_db02: 64
+  COMMON_dbb: 256
+  COMMON_dc01: 64
+  COMMON_dc02: 64
+
+luns_by_vg:
+  COMMON_spinst1: spvg
+  COMMON_actlog: spvg
+  COMMON_archlog: spvg
+  COMMON_db01: spvg
+  COMMON_db02: spvg
+  COMMON_dbb: spdbbvg
+  COMMON_dc01: spdatavg
+  COMMON_dc02: spdatavg
+
+sp_lvs:
+  COMMON_spinst1: spinst1lv
+  COMMON_actlog: actloglv
+  COMMON_archlog: archloglv
+  COMMON_db01: db01lv
+  COMMON_db02: db2lv
+  COMMON_dbb: dbblv
+  COMMON_dc01: dc01lv
+  COMMON_dc02: dc02lv
+
+lvs_by_vg:    # Do zakładania LVek
+  spinst1lv: spvg
+  actloglv: spvg
+  archloglv: spvg
+  db01lv: spvg
+  db2lv: spvg
+  dbblv: spdbbvg
+  dc01lv: spdatavg
+  dc02lv: spdatavg
+  
+sp_root: /sp
+sp_mounts:
+  spinst1lv: "{{ sp_root }}/spinst1"
+  actloglv: "{{ sp_root }}/actlog"
+  archloglv: "{{ sp_root }}/archlog"
+  db01lv: "{{ sp_root }}/db01"
+  db2lv: "{{ sp_root }}/db02"
+  dbblv: "{{ sp_root }}/dbb"
+  dc01lv: "{{ sp_root }}/dp/dc01"
+  dc02lv: "{{ sp_root }}/dp/dc01"

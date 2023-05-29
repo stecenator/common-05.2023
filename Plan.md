@@ -150,15 +150,87 @@ Dobrze jest nie trzymać haseł, nawet w formie hashy bezpośrednio w playbooku.
 
 	Po podaniu hasła wywoła się `$EDITOR` z Twoim plikiem. Po zamknięciu, plik zotanie automatycznie zaszyfrowany z powrotem.
 
-## Zainstalowane kolekcje
+# Instalacja!
 
-Żeby sprawdzić zainstalowane w systemie oraz na Twoim koncie kolekcje Ansible wykonaj polecenie:
+Instalację rozpoczynamy mając następujące środowisko:
 
+- AIXa z wymienionionego kluczami ssh root'a z kontrolerem Ansible. Host `ajax.iic` w inventory.
+- AIX jest postawiony na macierzy określonej zmienną `{{ fs_cluster }}` w `group_vars/storage.yaml`.
+- Na wypadek pomyłki lub chęci puszczenia wszystkiego od 0, AIX jest zesnapshotowany i istnieje mapowanie określone zmienną `{{ os_res_fcmap }}` w `group_vars/storage.yaml`. Jeśli chcesz **wszystko** odkręcić, po prostu puść:
 
+	```
+	❯ ansible-playbook AIX-restore.yaml -e @secrets/secrets.enc --ask-vault-pass
+	```
 
+Całość można oczywiście umieścić w jednym playbooku, ale do celów edukacyjnych podzieliłem go na dwie cześći, a taski otagowałem, żeby można je było puszczać pojedynczo.
 
 ## Pamięc masowa
 
+Ponieważ AIX jest już gotowy, to znaczy: 
+
+- jest LPAR
+- jest zoning
+- jest LUN z zainstalowanym OS
+- jet wjazd po ssh 
+
+(oczywiście wszystko to, da się zrobić Ansiblem :-) ), to można zacząć od przygotowania pamięci masowej dla IBM Spectrum Protect. Opis tego storage jest zawarty w zmiennej `{{ sp_luns }}` zdefiniowanej w w `group_vars/storage.yaml`
+
+```
+sp_luns:                # Hash w postaci Nawa_lunu: rozmiar  (w GiB)
+  COMMON_spinst1: 20
+  COMMON_actlog: 132
+  COMMON_archlog: 256
+  COMMON_db01: 64
+  COMMON_db02: 64
+  COMMON_dbb: 256
+  COMMON_dc01: 64
+  COMMON_dc02: 64
+```
+
+Można zatem uruchomić przygotowanie LUNów i zamapowanie ich na naszego AIXa:
+
+```
+❯ ansible-playbook   -e @secrets/secrets.enc --ask-vault-pass prep_storage.yaml
+```
+
 ## AIX - przygotowanie OS do roli SP
+
+### Użyszkodnik instancji `{{ sp_user }}`
+
+Standard AIX to sporo za mało:
+```
+$ ulimit -a 
+time(seconds)        unlimited
+file(blocks)         2097151
+data(kbytes)         131072
+stack(kbytes)        32768
+memory(kbytes)       32768
+coredump(blocks)     2097151
+nofiles(descriptors) 2000
+threads(per process) unlimited
+processes(per user)  128
+
+```
+
+Dlatego zmieniamy według zaleceń [IBM Spectrum Protect](https://www.ibm.com/docs/en/spectrum-protect/8.1.18?topic=instance-verifying-access-rights-user-limits)
+
+```
+Wrzucić sp_user_attrs
+```
+
+Dzięki temu `ulimit'y` użytkownika instancji bedą wyglądać tak:
+
+```
+$ ulimit -a
+time(seconds)        unlimited
+file(blocks)         unlimited
+data(kbytes)         131072
+stack(kbytes)        32768
+memory(kbytes)       32768
+coredump(blocks)     unlimited
+nofiles(descriptors) 65536
+threads(per process) unlimited
+processes(per user)  16384
+``` 
 
 ## Instalacja SP

@@ -27,8 +27,8 @@ Host, który będzie uruchamiał playbook, musi spełniać nastęþujące wymaga
 
 System musi spełniać wymagania opisane w [dokumentacji kolekcji](https://ibm.github.io/ansible-power-aix/requirements.html). W skrócie:
 
-	- AIX 7.1 lub wyższy
-	- Python 3. Im nowszy tym lepszy. Ale wmurowany 2.7 też się nadaje!
+- AIX 7.1 lub wyższy
+- Python 3. Im nowszy tym lepszy. Ale wmurowany 2.7 też się nadaje!
 
 ## Macierz 
 
@@ -36,6 +36,10 @@ Kolekcja `ibm.spectrum_virtulize` bazuje na REST API. To znaczy, że moduły są
 
 - dostępu do REST API macierzy: https://adres.macierzy:7443/rest 
 - Firmware macierzy > 8.3.1.5.
+
+## HMC
+
+- dostęp do HMC po REST API z hosta kontrolnego.
 
 # Zmienne
 

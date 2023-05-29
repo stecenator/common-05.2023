@@ -14,6 +14,9 @@
         log_path: "{{ fs_log }}"
         username: "{{ fs_username }}"
         password: "{{ fs_pass }}"
+      tags:
+        - "FS"
+
 
     # - name: Zbieranie informacji o macierzy
     #   register: svc_inf
@@ -23,6 +26,8 @@
     #     token: "{{ auth_info.token }}"
     #     gather_subset: system     # Bo domyślne `all` to trochę za dużo
 
-    # - name: Wyświetlanie informacji o macierzy
-    #   debug:
-    #     var: svc_inf
+    - name: Wyświetlanie informacji o macierzy
+      debug:
+        var: sp_luns
+      tags:
+        - "DBG"

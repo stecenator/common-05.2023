@@ -6,8 +6,12 @@
 
 sp_user: spinst1
 # sp_pass:  schowany w secrets/secrets.enc
+sp_user_attrs:    # Tu wrzucać wszystkie atrybuty, którymi użytkownik rożni się od standardu. Nazwy atrubutów jak w chuser
+  nproc: 16384
+  core: -1
+  fsize: -1
+  nofiles: 65536
 
 # Użyteczny użyszkodnik
-
 user1: marcinek
 # user1_pass: schowany w secrets/secrets.enc

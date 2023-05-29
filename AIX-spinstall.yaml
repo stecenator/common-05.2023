@@ -10,20 +10,141 @@
   # become: True
 
   tasks:
-    - name: Debug
-      debug:
-        var: sp_pass
-        
     - name: Zakładanie użyszkodnika instancji
       ibm.power_aix.user:
         name: "{{ sp_user }}"
         state: present
         change_passwd_on_login: False
         password: "{{ sp_pass }}"
-        # attributes: wrzucic ti dict z rekomendowanymi atrybutami dla włąsciciela instancji Protect
+        attributes: "{{ sp_user_attrs }}"     # Tu jest bug: jak użytkownik jest, to atrybuty nie są poprawiane
+      tags:
+        - "USERS"
+
     - name: Zakładanie dodatkowego użyszkodnika
       ibm.power_aix.user:
         name: "{{ user1 }}"
         state: present
         change_passwd_on_login: False
         password: "{{ user1_pass }}"
+      tags:
+        - "USERS"
+
+    - name: Konfig-magister
+      ibm.power_aix.devices:
+        device: "all"
+        state: available
+      tags:
+        - "CFGMGR"
+
+    # - name: Zbieranie informacji o odkrytych dyskach
+    #   ibm.power_aix.mpio:
+    #   tags:
+    #     - "LVM"
+
+    # - name: Pokaż scieżki
+    #   debug:
+    #     var: ansible_facts.mpio
+    #   tags:
+    #     - "LVM"
+
+    - name: Zbieranie informacji o scieżkach - wersja brzydka
+      register: lsmpio
+      shell: lsmpio -q | grep hdisk|grep -v hdisk0 |tr -s ' '| sed 's/\(^[a-zA-Z0-9]*\).* \(.*\) $/\1:\2/'
+      tags:
+        - "LVM"
+
+    - name: Pokaż scieżki
+      debug:
+        msg: "{{ item | split(':') }}"
+      with_items: "{{ lsmpio.stdout_lines }}"
+      tags:
+        - "LVM"
+
+    - name: Szczypta magii Ansiblowej - tworzenie hasha luns_2_hdisk
+      set_fact:
+        luns_2_hdisk: "{{ luns_2_hdisk | default({}) | combine ( { item|split(':')|last: item|split(':')|first } )}}"  # Pusty hash 
+      with_items: "{{ lsmpio.stdout_lines }}"
+      tags:
+        - "LVM"
+
+    - name: Przypisywanie hdisków do VG
+      set_fact:
+        pv_in_vg: "{{ pv_in_vg | default({}) | combine ( { item.value: luns_by_vg[item.key] } ) }}"
+      with_dict: "{{ luns_2_hdisk }}"
+      tags:
+        - "LVM"
+
+    - name: Szkielet list PV w VG
+      set_fact:
+        pvs_by_vg: "{{ pvs_by_vg | default({}) | combine( { item.value: [] } ) }}"
+      with_dict: "{{ pv_in_vg }}"
+      tags:
+        - "LVM"
+
+    - name: Tworzenie list PV w grupach VG
+      set_fact:
+        pvs_by_vg: "{{ pvs_by_vg | default({}) | combine( { item.value: pvs_by_vg[item.value] + [item.key] } ) }}"
+      with_dict: "{{ pv_in_vg }}"
+      tags:
+        - "LVM"
+
+    - name: "Mapowanie LV w na PV, bo TSM lubi 1:1"
+      set_fact:
+        lvs_by_pv: "{{ lvs_by_pv | default({}) | combine( { sp_lvs[item.key]: item.value } ) }}"
+      with_dict: "{{ luns_2_hdisk }}"
+      tags:
+        - "LVM"
+
+    - name: "Tworzenie VG"
+      ibm.power_aix.lvg:
+        vg_name: "{{ vg }}"
+        state: present
+        pvs: "{{ pvs_by_vg[vg]|join(' ') }}"
+        vg_type: scalable
+      with_items: "{{ pvs_by_vg.keys()|list }}"
+      loop_control:
+        loop_var: vg
+      tags:
+        - "LVM"
+
+    - name: "Zbieranie faktów o LVMie"
+      ibm.power_aix.lvm_facts:
+        name: all
+        component: pv
+      tags:
+        - "LVM"
+        - "LVMINFO"
+
+    - name: "Pokaż co wiesz o LVM"
+      debug:
+        var: ansible_facts.LVM
+      tags:
+        - "LVM"
+        - "LVMINFO"
+
+    - name: "Pokaż mapowanie LV -> PV"
+      debug:
+        var: lvs_by_pv
+      tags:
+        - "LVM"
+        - "LVMINFO"
+
+    # - name: Pobieranie rozmiarów PV
+    #   debug:
+    #     msg: "LV {{ item.key }} dysk, {{ item.value }} rozmiar {{ ansible_facts.LVM.PVs[item.value].free_g }}"
+    #   with_dict: "{{ lvs_by_pv }}"
+    #   tags:
+    #     - "LVM"
+
+    - name: Zakładanie LV
+      ibm.power_aix.lvol:
+        vg: "{{ lvs_by_vg[item.key] }}"
+        lv: "{{ item.key }}"
+        pv_list: "{{ [item.value] }}"
+        size: "{{ ansible_facts.LVM.PVs[item.value].free_pps }}"
+        state: present
+        lv_type: jfs2
+        extra_opts: "-x {{ ansible_facts.LVM.PVs[item.value].free_pps }}"   # To trochę utrudni życie potem
+      with_dict: "{{ lvs_by_pv }}"
+      tags:
+        - "LVM"
