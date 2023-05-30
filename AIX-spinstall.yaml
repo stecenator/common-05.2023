@@ -148,3 +148,183 @@
       with_dict: "{{ lvs_by_pv }}"
       tags:
         - "LVM"
+
+    - name: włączanie współpracy z NFS na Linuxie
+      command: nfso -p -o nfs_use_reserved_ports=1
+      tags:
+        - "OSUPD"
+
+    - name: Montowanie filesystemu NFS z poprawkami
+      ibm.power_aix.mount:
+        state: mount
+        node: 10.10.120.40
+        mount_dir: /repos
+        mount_over_dir: /mnt
+      tags:
+        - "OSUPD"
+
+    - name: Aktualizowanie xlC (lepiej azaktualizować system!!!)
+      ibm.power_aix.installp:
+        extend_fs: yes
+        device: /mnt/POWER/AIX_72_TL5_06_2320
+        install_list: xlC.rte
+        commit: yes
+      tags:
+        - "OSUPD"
+
+    - name: "Zakłdanie katalogu {{ sp_root }}"
+      file:
+        path: "{{ sp_root }}"
+        state: directory
+        owner: "{{ sp_user }}"
+        mode: '0755'
+      tags:
+        - "FS"
+
+    - name: "Zakładanie punktów montowania filesystemów"
+      file:
+        path: "{{ item.value }}"
+        state: directory
+        owner: "{{ sp_user }}"
+        mode: '0755'
+      with_dict: "{{ sp_mounts }}"
+      tags:
+        - "FS"
+
+    - name: "Tworzenie filesystemów JFS2"
+      ibm.power_aix.filesystem:
+        device: "{{ item.key }}"
+        filesystem: "{{ item.value }}"
+        state: present
+        fs_type: jfs2
+        auto_mount: True
+        attributes: logname=INLINE
+        mount_group: sp         # Żeby można było montować statdnie
+      with_dict: "{{ sp_mounts }}"
+      tags:
+        - "FS"
+
+    - name: Montowanie filesystemów
+      ibm.power_aix.mount:
+        state: mount
+        fs_type: sp             # Montowanie statdnie
+      tags:
+        - "FS"
+
+    - name: Leperowanie uprawnień na zamontowanych filesystemach
+      file:
+        path: "{{ item.value }}"
+        state: directory
+        owner: "{{ sp_user }}"
+        mode: '0755'
+      with_dict: "{{ sp_mounts }}"
+      tags:
+        - "FS"
+
+    - name: Pobieranie informacji o /opt i /tmp
+      set_fact:
+        opt_info: "{{ ansible_mounts | selectattr('mount', 'search', '/opt') | first }}"
+        tmp_info: "{{ ansible_mounts | selectattr('mount', 'search', '/tmp') | first }}"
+        home_info: "{{ ansible_mounts | selectattr('mount', 'search', '/home') | first }}"
+        var_info: "{{ ansible_mounts | selectattr('mount', 'search', '/var') | first }}"
+        root_info: "{{ ansible_mounts | selectattr('mount', 'search', '/') | first }}"
+      tags:
+        - "INST"
+        - "ROOTFS"
+
+    - name: Upewnianie się, czy w /opt jest 13G wolnego miejsca
+      ibm.power_aix.filesystem:
+        state: present
+        filesystem: /opt
+        attributes: "size=+{{ (3407872 - opt_info['block_available']) * 8 }}"   # Powiekszamy w 512b blokach AIXowych!!!!
+      when: opt_info['block_available'] < 3407872         #  3407872 to 6 GiB w 4 KB blokach
+      tags:
+        - "INST"
+
+    - name: Upewnianie się, czy w /tmp jest 4G wolnego miejsca
+      ibm.power_aix.filesystem:
+        state: present
+        filesystem: /tmp
+        attributes: "size=+{{ (1048576 - tmp_info['block_available']) * 8 }}"   # Powiekszamy w 512b blokach AIXowych!!!!
+        # msg: "na /tmp brakuje {{ (1048576 - tmp_info['block_available']) * 4 }} kb wolnego"
+      when: tmp_info['block_available'] < 1048576         #  1048576 to 4 GiB w 4 KB blokach
+      tags:
+        - "INST"
+
+    - name: Upewnianie się, czy w /home jest 4G wolnego miejsca
+      ibm.power_aix.filesystem:
+        state: present
+        filesystem: /home
+        attributes: "size=+{{ (1048576 - home_info['block_available']) * 8 }}"   # Powiekszamy w 512b blokach AIXowych!!!!
+      when: home_info['block_available'] < 1048576         #  1048576 to 4 GiB w 4 KB blokach
+      tags:
+        - "INST"
+
+    - name: Upewnianie się, czy w /var jest 3G wolnego miejsca
+      ibm.power_aix.filesystem:
+        state: present
+        filesystem: /var
+        attributes: "size=+{{ (3145728 - var_info['block_available']) * 8 }}"   # Powiekszamy w 512b blokach AIXowych!!!!
+      when: var_info['block_available'] < 3145728         #  3145728 to 3 GiB w 4 KB blokach
+      tags:
+        - "INST"
+
+    - name: Upewnianie się, czy w / jest 1G wolnego miejsca
+      ibm.power_aix.filesystem:
+        state: present
+        filesystem: /
+        attributes: "size=+{{ (262144 - root_info['block_available']) * 8 }}"   # Powiekszamy w 512b blokach AIXowych!!!!
+      when: root_info['block_available'] < 262144         #  262144 to 1 GiB w 4 KB blokach
+      tags:
+        - "INST"
+        - "ROOTFS"
+
+    - name: Tworzenie katalogu instalacji SPectrum Protect
+      file:
+        path: /home/sp-install
+        state: directory
+      tags:
+        - "INST"
+
+    - name: Wysyłanie instalki SP na hosta
+      copy:
+        src: 8.1.18.000-IBM-SPSRV-AIX.bin
+        dest: /home/ibm/8.1.18.000-IBM-SPSRV-AIX.bin
+        owner: root
+        mode: 0755
+      tags:
+        - "INST"
+
+    # - name: Nadawanie praw wykonywania instalce SP
+    #   file:
+    #     path: /home/ibm/8.1.18.000-IBM-SPSRV-AIX.bin
+    #     mode: '0755'
+    #   tags:
+    #     - "INST"
+
+
+    - name: Rozpakowanie binarki SP
+      command:
+        chdir: "/home/sp-install"
+        cmd: "/home/ibm/8.1.18.000-IBM-SPSRV-AIX.bin"
+        creates: "/home/sp-install/install.sh"
+      tags:
+        - "INST"
+
+    - name: Wysłanie pliku odpowiedzi dla instalacji
+      copy:
+        src: sp-install.xml
+        dest: /home/sp-install/sp-install.xml
+        owner: root
+        mode: 0644
+      tags:
+        - "INST"
+
+    - name: Cicha instalacja serwera TSM
+      command:
+        chdir: "/home/sp-install"
+        cmd: ./install.sh -s -input sp-install.xml -acceptLicense 
+        creates: "/opt/tivoli/tsm/server/bin/dsmserv"
+      tags:
+        - "INST" 
+        - "SPINST"

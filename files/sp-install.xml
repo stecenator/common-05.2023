@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<agent-input>
+  <variables>
+    <variable name='sharedLocation' value='/opt/IBM/IBMIMShared'/>
+  </variables>
+  <server>
+    <repository location='repository'/>
+    <repository location='im32'/>
+  </server>
+  <profile id='IBM Installation Manager' installLocation='/opt/IBM/InstallationManager/eclipse' kind='self'>
+    <data key='cic.selector.arch' value='ppc'/>
+    <data key='cic.selector.ws' value='gtk'/>
+    <data key='cic.selector.nl' value='de,no,fi,ru,hr,pt_BR,fr,hu,zh_TW,zh_HK,sk,sl,sv,ko,el,en,it,iw,zh,es,cs,ar,th,ja,pl,da,nl,tr'/>
+  </profile>
+  <install>
+    <!-- IBM® Installation Manager 1.9.2.3 -->
+    <offering profile='IBM Installation Manager' id='com.ibm.cic.agent' version='1.9.2003.20220917_1018' features='agent_core,agent_jre,agent_web'/>
+  </install>
+  <profile id='IBM Spectrum Protect' installLocation='/opt/tivoli/tsm'>
+    <data key='cic.selector.arch' value='ppc64'/>
+    <data key='cic.selector.ws' value='gtk'/>
+    <data key='user.entitlement,com.tivoli.dsm.server' value='2'/>
+    <data key='user.license,com.tivoli.dsm.server' value='tsmee'/>
+    <data key='user.license_option,com.tivoli.dsm.server' value='a'/>
+  </profile>
+  <install>
+    <!-- IBM Spectrum Protect server 8.1.18.20230301_1829 -->
+    <offering profile='IBM Spectrum Protect' id='com.tivoli.dsm.server' version='8.1.18.20230301_1829' features='com.tivoli.dsm.server.main,com.tivoli.dsm.gskit,com.tivoli.dsm.clientapi,com.ibm.java.jre'/>
+    <!-- Open Snap Store Manager 8.1.18.20230301_1823 -->
+    <offering profile='IBM Spectrum Protect' id='com.tivoli.dsm.ossm' version='8.1.18.20230301_1823' features='com.tivoli.dsm.ossm.main,com.tivoli.dsm.gskit'/>
+  </install>
+  <preference name='com.ibm.cic.common.core.preferences.eclipseCache' value='${sharedLocation}'/>
+</agent-input>

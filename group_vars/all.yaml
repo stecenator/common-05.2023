@@ -44,7 +44,7 @@ lvs_by_vg:    # Do zakładania LVek
   dbblv: spdbbvg
   dc01lv: spdatavg
   dc02lv: spdatavg
-  
+
 sp_root: /sp
 sp_mounts:
   spinst1lv: "{{ sp_root }}/spinst1"
@@ -54,4 +54,4 @@ sp_mounts:
   db2lv: "{{ sp_root }}/db02"
   dbblv: "{{ sp_root }}/dbb"
   dc01lv: "{{ sp_root }}/dp/dc01"
-  dc02lv: "{{ sp_root }}/dp/dc01"
+  dc02lv: "{{ sp_root }}/dp/dc02"

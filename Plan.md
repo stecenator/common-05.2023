@@ -233,4 +233,12 @@ threads(per process) unlimited
 processes(per user)  16384
 ``` 
 
+### Konfig-magister
+
+### Tworzenie grup woluminów
+
+### Tworzenie LV i filesystemów
+
+### Ustawianie uprawnień.
+
 ## Instalacja SP
