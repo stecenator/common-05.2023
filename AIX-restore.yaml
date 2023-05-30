@@ -66,7 +66,17 @@
         - "FS_FC_REV"
 
     # - name: "Zdejmowanie volumeprotection na macirzy {{ fs_cluster }}"
-    # - name: "Zdejmowanie mapowań z LUNów sp_luns dla hosta {{ fs_host }} z macirzy {{ fs_cluster }}"
+    - name: "Zdejmowanie mapowań z LUNów sp_luns dla hosta {{ fs_host }} z macirzy {{ fs_cluster }}"
+      ibm.spectrum_virtualize.ibm_svc_vol_map:
+        clustername: "{{ fs_cluster }}"
+        log_path: "{{ fs_log }}"
+        token: "{{ auth_info.token }}"
+        volname: "{{ item.key }}"
+        host: "{{ fs_host }}"
+        state: absent
+      with_dict: "{{ sp_luns }}"
+      tags:
+        - "SP_LUNS_DEL"
 
     - name: "Usuwanie dysków z hasha {{ sp_luns }}"
       ibm.spectrum_virtualize.ibm_svc_manage_volume:
